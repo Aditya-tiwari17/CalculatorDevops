@@ -1,4 +1,3 @@
-FROM java:8
-WORKDIR /
-ADD Calculator-1.0-SNAPSHOT.jar Calculator-1.0-SNAPSHOT.jar
-CMD java -jar Calculator-1.0-SNAPSHOT.jar
+FROM openjdk:8
+ADD target/SimpleCalculator-0.0.1-SNAPSHOT.jar SimpleCalculator-0.0.1-SNAPSHOT.jar
+ENTRYPOINT ["java", "-jar", "/SimpleCalculator-0.0.1-SNAPSHOT.jar"]
