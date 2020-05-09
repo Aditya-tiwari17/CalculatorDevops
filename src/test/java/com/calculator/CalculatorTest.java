@@ -17,7 +17,7 @@ public class CalculatorTest {
         double b = 20;
         double expectedResult = 35.0;
         double result = calculator.add(a, b);
-//        Assert.assertEquals(expectedResult, result);
+        Assert.assertEquals(expectedResult, result,0.00005);
     }
     
     @Test
@@ -26,7 +26,7 @@ public class CalculatorTest {
         double b = 20;
         double expectedResult = 5;
         double result = calculator.subtract(a, b);
-//        Assert.assertEquals(expectedResult, result);
+        Assert.assertEquals(expectedResult, result,0.00005);
     }
     
     @Test
@@ -35,7 +35,7 @@ public class CalculatorTest {
         double b = 25;
         double expectedResult = 250;
         double result = calculator.multiply(a, b);
-//        Assert.assertEquals(expectedResult, result);
+        Assert.assertEquals(expectedResult, result,0.00005);
     }
     
     @Test
@@ -44,7 +44,7 @@ public class CalculatorTest {
         double b = 10;
         double expectedResult = 5.6;
         double result = calculator.divide(a, b);
-//        Assert.assertEquals(expectedResult, result,0.00005);
+        Assert.assertEquals(expectedResult, result,0.00005);
     }
     
     @Test(expected = IllegalArgumentException.class)

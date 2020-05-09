@@ -1,55 +1,53 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" 
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.calculator.app</groupId>
-	<artifactId>Calculator</artifactId>
-	<packaging>jar</packaging>
-	<version>1.0-SNAPSHOT</version>
-	<name>calculator</name>
-	<url>http://maven.apache.org</url>
-	
-	<dependencies>
-   		<dependency>
-   			<groupId>junit</groupId>
-   			<artifactId>junit</artifactId>
-   			<version>4.12</version>
-   			<scope>test</scope>
-   		</dependency>
-   	</dependencies>
-
-	<!-- <build>
-	    	<plugins>
-			<plugin>
-		    		<groupId>org.apache.maven.plugins</groupId>
-		    		<artifactId>maven-compiler-plugin</artifactId>
-		    		<version>3.7.0</version>
-		    		<configuration>
-		    		</configuration>
-			</plugin>
-			<plugin>
-          			<groupId>org.apache.maven.plugins</groupId>
-          			<artifactId>maven-surefire-plugin</artifactId>
-          			<version>3.0.0-M4</version>
-        		</plugin>
-	    	</plugins>
-	</build> -->
-	<build>
-	<plugins>
-		<plugin>
-			<!-- Build an executable JAR -->
-			<groupId>org.apache.maven.plugins</groupId>
-			<artifactId>maven-jar-plugin</artifactId>
-			<version>3.2.0</version>
-			<configuration>
-				<archive>
-					<manifest>
-						<mainClass>com.calculator.Calculator</mainClass>
-					</manifest>
-				</archive>
-			</configuration>
-		</plugin>
-	</plugins>
-</build>
-
-</project>
+pipeline {
+  environment {
+    registry = "adityat17/calculatordevops"
+    registryCredential = 'docker-hub-credentials'
+    dockerImage = ''
+    dockerImageLatest = ''
+  }
+  agent any
+  stages {
+    stage('Cloning Git') {
+      steps {
+        git 'https://github.com/Aditya-tiwari17/CalculatorDevops.git'
+      }
+    }
+    stage('Build Executable Jar'){
+        steps {
+             sh 'mvn clean compile install'
+        }
+    }
+    stage('Building image') {
+      steps{
+        script {
+          dockerImage = docker.build registry + ":$BUILD_NUMBER"
+          dockerImageLatest = docker.build registry + ":latest"
+        }
+      }
+    }
+    stage('Deploy Image') {
+      steps{
+        script {
+          docker.withRegistry( '', registryCredential ) {
+            dockerImage.push()
+            dockerImageLatest.push()
+          }
+        }
+      }
+    }
+    stage('Remove Unused docker image') {
+      steps{
+        sh "docker rmi $registry:$BUILD_NUMBER"
+      }
+    }
+    
+  }
+  post {
+      always{
+        emailext body: "Dear Sir/Mam, <br/><br/> ${currentBuild.currentResult}: Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}  <br/>  More info at: ${env.BUILD_URL}  <br/><br/>  THIS IS A SYSTEM GENERATED EMAIL. PLEASE DO NOT REPLY.",
+                recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'RequesterRecipientProvider']],
+                subject: "Jenkins Build ${currentBuild.currentResult}: Job ${env.JOB_NAME}"
+            
+        }
+    }
+}
